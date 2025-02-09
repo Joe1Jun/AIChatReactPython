@@ -1,71 +1,104 @@
-import React from "react";
 import { useState } from "react";
 import axios from "axios";
 import { v4 as uuidv4 } from 'uuid';
 
+// Interface sets up the requirements for the message type
 interface Message {
-  id: string,
-  role : string,
-  content : string
-
+  id: string;
+  role: string;
+  content: string;
+  //This can be used to reassemble the conversation in order 
+  createdAt: string; // ISO 8601 timestamp or Date object
 }
 
+
+
+
 const Chat = () => {
+  //Initialises the useState of the messages as an empty array of the interface types
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [conversationId , setConversationId] = useState<string | null>(null);
+  const [input, setInput] = useState("");
+  
 
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [input, setInput] = useState("");
 
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault()
-        setInput(e.target.value);
-      };
+  // Handle input change (no need for explicit event typing in TypeScript)
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    setInput(e.target.value);
+  };
 
-    const handleSubmit = () => {
-        if (input.trim() === "") return;
-        console.log(input)
-        
+  // Handle message sending
+  const handleSubmit = () => {
+    if (input.trim() === "") return;
+    console.log(input)
     
-        // Add user message to the chat
-        //uuid randomly generates a string each time this method is called
-        //Allows for unique id for each message
-        const userMessage = { id: uuidv4(), role: "user", content: input };
-        
-        setMessages([...messages, userMessage]);
-        
-        
-        console.log(userMessage)
-        
-        handleResponse(userMessage)
-        
-        
-        setInput(""); // Clear input field
-      };
+
+    // Add user message to the chat
+    //uuid randomly generates a string each time this method is called
+    //Allows for unique id for each message
+    const userMessage = { id: uuidv4(), role: "user", content: input, createdAt: new Date().toISOString(), };
     
-      const handleResponse = async (message: {id: string; role: string; content: string }) => {
-        try {
-          const userId = message.id
-          const response = await axios.post("http://localhost:5000/chat", {
-          // messge will be automatically converted to a json array with axios
-           message: [{ id: userId , role : "user", content: message.content }],
-           });
-           console.log(response.data)
-           const aiResponse = { id: uuidv4(), role: "Ai", content: response.data };
+    setMessages([...messages, userMessage]);
+    
+    
+    console.log(userMessage)
+    
+    handleResponse(userMessage)
+    
+    
+    setInput(""); // Clear input field
+  };
 
-           setMessages((prevMessages) => [...prevMessages, aiResponse]);
+  const handleResponse = async (message: {id: string; role: string; content: string }) => {
+    try {
+      //const userId = message.id
+      const response = await axios.post("http://localhost:5000/chat", {
+       // messages: [{ id: userId , role : "user", content: message.content }],
+       chatData: {
+        message : message,
+        conversationId : conversationId,
+        stream : true
+      }
+       
+      });
+  
+      console.log("AI Response:", response.data.response);
 
+      setConversationId(response.data.conversationId)
+      
+      const aiMessage = {
+        id: uuidv4(),
+        role: "AI",
+        content: response.data.response,
+        createdAt: new Date().toISOString(),
+      };
+      
+           
+      // Check if AI message is constructed properly
+      console.log("New AI Message:", aiMessage);
 
-
-
-        } catch (error ){  
-            console.log(error, "error")
-        }
-
-
-    return (
-     <div>
-
-<div className="flex-1  pb-24 px-4 mt-6 ">
+      // Correctly append aiMessage to the state using the previous state (prevMessages)
+    setMessages(prevMessages => [...prevMessages, aiMessage]);
+  
+    } catch (error) {
+      console.error("Error fetching AI response:", error);
+    }
+  };
+  
+  
+  
+  
+// md:ml-64 worked to solve the issue with the chat page
+  return (
+    
+    <div className="flex flex-col h-screen md:ml-64">
+  <div className="flex flex-col items-center justify-center h-screen mt-8">
+    <h1 className="text-4xl font-bold text-white mb-4">ChatApp</h1>
+    <hr className="w-3/4 border-t-2 border-gray-400" />
+  </div>
+     <div className="flex-1  pb-24 px-4 mt-6 ">
       {messages.map(m => (
 
         <div key={m.id} className={`flex mb-4  ${m.role === 'user' ? 'justify-start' : 'justify-end'}`}>
@@ -79,34 +112,29 @@ const Chat = () => {
       ))}
     </div>
 
-<div className="fixed bottom-0 left-0 right-0 md:left-64">
-<div className="w-full backdrop-blur-sm p-4 md:p-6 flex justify-center items-center">
-  <input
-    className="w-full md:w-1/2 p-2 border border-gray-300 rounded-lg shadow-md"
-    value={input}
-    placeholder="Say something..."
-    onChange={handleInputChange}
-  />
-  <button
-    className="ml-2 p-2 bg-blue-500 text-white rounded-lg"
-    onClick={handleSubmit}
-  >
-    Send
-  </button>
-</div>
-</div>
-
-     </div>   
     
-    )
+   
+
+      <div className="fixed bottom-0 left-0 right-0 md:left-64">
+        <div className="w-full backdrop-blur-sm p-4 md:p-6 flex justify-center items-center">
+          <input
+            className="w-full md:w-1/2 p-2 border border-gray-300 rounded-lg shadow-md"
+            value={input}
+            placeholder="Say something..."
+            onChange={handleInputChange}
+          />
+          <button
+            className="ml-2 p-2 bg-blue-500 text-white rounded-lg"
+            onClick={handleSubmit}
+          >
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Chat;
 
 
-}
-}
-      
-
-    
-
-
-
-export default Chat
