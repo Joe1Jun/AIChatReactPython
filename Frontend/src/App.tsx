@@ -1,32 +1,34 @@
 import React, { useState } from 'react';
-import Chat from './Components/Chat/chat';
-import { DisplayComponent } from './Enums/DisplayCompoent'
+import Sidebar from './components/Sidebar';
+import { SidebarView } from './types';
+import ChatView from './components/ChatView';
+import SettingsView from './components/SettingsView';
+import HistoryView from './components/HistoryView';
+import ProfileView from './components/ProfileView';
 
-const App = () => {
-  //const [active, setActive] = useState<DisplayComponent>(DisplayComponent.Dashboard1);
+const COMPONENT_MAP: Record<SidebarView, React.FC> = {
+  [SidebarView.CHAT]: ChatView,
+  [SidebarView.SETTINGS]: SettingsView,
+  [SidebarView.HISTORY]: HistoryView,
+  [SidebarView.PROFILE]: ProfileView,
+};
 
-  // Map the enum to components
-  // const componentMap = {
-  //   [DisplayComponent.Dashboard1]: <Dashboard />,
-  //   [DisplayComponent.Dashboard2]: <Dashboard />,
-  //   [DisplayComponent.Income]: <Income />,
-  //   [DisplayComponent.Expenses]: <Expenses />,
-  // };
+const App: React.FC = () => {
+  const [activeView, setActiveView] = useState<SidebarView>(SidebarView.CHAT);
+
+  const Component = COMPONENT_MAP[activeView];
 
   return (
-    
-        <div>
-          <Chat />
-        </div>
-   
-     
-            
-              
-              
-           
-          
-   
+    <div className="flex">
+      {/* Render Sidebar */}
+      <Sidebar activeView={activeView} onViewChange={setActiveView} />
+
+      {/* Render Active Component as Main Content */}
+      <div className="flex-1 p-4">
+        <Component />
+      </div>
+    </div>
   );
-}
+};
 
 export default App;
