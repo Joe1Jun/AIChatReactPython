@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { } from 'react';
 import Sidebar from './Components/Sidebar';
 import { SidebarView } from './types/DisplayComponents';
 import { SidebarProvider, useSidebar } from './context/sidebarContext';
 import Chat from './Components/chat';
-import Settings from ""
-import Historyfrom './components/History';
-import Profile from './components/Profile';
+import Settings from './Components/Settings';
+import History from './Components/History';
+import Profile from './Components/Profile';
 
 const COMPONENT_MAP: Record<SidebarView, React.FC> = {
   [SidebarView.CHAT]: Chat,
   [SidebarView.SETTINGS]: Settings,
-  [SidebarView.HISTORY]: HistoryView,
+  [SidebarView.HISTORY]: History,
   [SidebarView.PROFILE]: Profile,
 };
 

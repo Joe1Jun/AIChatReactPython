@@ -4,7 +4,7 @@ import { useSidebar } from '../context/sidebarContext';
 
 const Sidebar: React.FC = () => {
   const { activeView, setActiveView } = useSidebar(); // Use context
-
+  console.log("re rendered")
   const sidebarItems = [
     { view: SidebarView.CHAT, label: 'Chat' },
     { view: SidebarView.SETTINGS, label: 'Settings' },
