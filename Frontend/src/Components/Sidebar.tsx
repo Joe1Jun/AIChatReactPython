@@ -1,12 +1,10 @@
 import React from 'react';
-import { SidebarView } from '../types';
+import { SidebarView } from '../types/DisplayComponents';
+import { useSidebar } from '../context/sidebarContext';
 
-type SidebarProps = {
-  activeView: SidebarView;
-  onViewChange: (view: SidebarView) => void;
-};
+const Sidebar: React.FC = () => {
+  const { activeView, setActiveView } = useSidebar(); // Use context
 
-const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
   const sidebarItems = [
     { view: SidebarView.CHAT, label: 'Chat' },
     { view: SidebarView.SETTINGS, label: 'Settings' },
@@ -19,7 +17,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
       {sidebarItems.map(({ view, label }) => (
         <button
           key={view}
-          onClick={() => onViewChange(view)}
+          onClick={() => setActiveView(view)}
           className={`w-full text-left p-2 mb-2 rounded ${
             activeView === view ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'
           }`}
@@ -31,4 +29,4 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
   );
 };
 
-export default Sidebar;
+export default React.memo(Sidebar);

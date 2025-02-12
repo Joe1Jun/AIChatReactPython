@@ -1,33 +1,38 @@
 import React, { useState } from 'react';
-import Sidebar from './components/Sidebar';
-import { SidebarView } from './types';
-import ChatView from './components/ChatView';
-import SettingsView from './components/SettingsView';
-import HistoryView from './components/HistoryView';
-import ProfileView from './components/ProfileView';
+import Sidebar from './Components/Sidebar';
+import { SidebarView } from './types/DisplayComponents';
+import { SidebarProvider, useSidebar } from './context/sidebarContext';
+import Chat from './Components/chat';
+import Settings from ""
+import Historyfrom './components/History';
+import Profile from './components/Profile';
 
 const COMPONENT_MAP: Record<SidebarView, React.FC> = {
-  [SidebarView.CHAT]: ChatView,
-  [SidebarView.SETTINGS]: SettingsView,
+  [SidebarView.CHAT]: Chat,
+  [SidebarView.SETTINGS]: Settings,
   [SidebarView.HISTORY]: HistoryView,
-  [SidebarView.PROFILE]: ProfileView,
+  [SidebarView.PROFILE]: Profile,
 };
 
-const App: React.FC = () => {
-  const [activeView, setActiveView] = useState<SidebarView>(SidebarView.CHAT);
-
+const MainContent: React.FC = () => {
+  const { activeView } = useSidebar(); // Access state from context
   const Component = COMPONENT_MAP[activeView];
 
   return (
-    <div className="flex">
-      {/* Render Sidebar */}
-      <Sidebar activeView={activeView} onViewChange={setActiveView} />
-
-      {/* Render Active Component as Main Content */}
-      <div className="flex-1 p-4">
-        <Component />
-      </div>
+    <div className="flex-1 p-4">
+      <Component />
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <SidebarProvider>
+      <div className="flex">
+        <Sidebar />
+        <MainContent />
+      </div>
+    </SidebarProvider>
   );
 };
 
